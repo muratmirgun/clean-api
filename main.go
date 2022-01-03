@@ -1,15 +1,27 @@
 package main
 
-import "github.com/labstack/echo/v4"
+import (
+	userController "clean-api/controllers/user"
+	"clean-api/database/user"
+	"clean-api/pkg/db"
+	"github.com/labstack/echo/v4"
+)
 
 func main() {
+
+	database := db.InitDB()
+	if database == nil {
+		panic("Database connection failed")
+	}
+
 	instance := echo.New()
-	instance.GET("/", func(c echo.Context) error {
-		return c.String(200, "Hello, World!")
-	})
+
+	userRepo := user.NewRepository(database)
+	UserApiController := userController.NewController(userRepo)
+	userController.NewHandlers(instance, UserApiController)
+
 	err := instance.Start(":8080")
 	if err != nil {
 		return
 	}
 }
-
